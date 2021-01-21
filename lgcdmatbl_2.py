@@ -48,7 +48,7 @@ for cn in range(imgcnt):
                 bit = fd.read(2)
                 outtmp += bit*cnt
                 
-        outp += outtmp
+        outp += outtmp[:tsz]
     elif widthtype == 0x00 and heighttype == 0x00:
         outp += fd.read(tsz)
     
