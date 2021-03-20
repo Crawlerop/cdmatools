@@ -9,6 +9,8 @@ if len(sys.argv) < 3:
 skip_bits = []
 if len(sys.argv) > 3:
 	skip_bits = [int(k, 16) for k in sys.argv[3].split(",")]
+	
+print(skip_bits)
 
 sz = os.path.getsize(sys.argv[1])
 fd = open(sys.argv[1], "rb")
@@ -17,13 +19,16 @@ out = open(sys.argv[2], "wb")
 obuf = bytearray()
 
 while fd.tell() < sz:
-	rl_offs = struct.unpack("<H", fd.read(2))[0]
-	if rl_offs == 1 and fd.tell()-2 not in skip_bits:
+	p = fd.read(2)
+	if p == b"\1\0" and fd.tell()-2 not in skip_bits:
 		bit = fd.read(2)
-		cnt = struct.unpack("<H", fd.read(2))[0]
-		obuf += bit*cnt
+		if bit == b"\1\0":
+			obuf += p
+		else:
+			cnt = struct.unpack("<H", fd.read(2))[0]
+			obuf += bit*cnt
 	else:
-		obuf += struct.pack("<H", rl_offs)
+		obuf += p
 		
 out.write(obuf)
 		
