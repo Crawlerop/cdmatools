@@ -1,23 +1,24 @@
-import utils
+import struct
 import os
+import sys
 
-sz = os.path.getsize("rel_c")
-fd = open("rel_c", "rb")
+sz = os.path.getsize(sys.argv[1])
+fd = open(sys.argv[1], "rb")
 #fd.seek(0x7a8020)
 
 outp = bytearray()
 
 while fd.tell() < sz:
     #print(fd.tell())
-    tt = utils.ioread_u16BitLE(fd)
+    tt = struct.unpack("<H", fd.read(2))[0]
             
     if tt != 0xad45:
-        outp += utils.put_u16BitLE(tt)
+        outp += struct.pack("<H", tt)
     else:
-    	d = utils.ioread_u16BitLE(fd)
+    	d = struct.unpack("<H", fd.read(2))[0]
     	outp += fd.read(2)*d
     
        
     
-open("rel_c_out","wb").write(outp)
+open(sys.argv[2],"wb").write(outp)
 
