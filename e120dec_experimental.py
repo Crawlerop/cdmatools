@@ -21,7 +21,7 @@ obuf = bytearray()
 while fd.tell() < sz:
 	p = fd.read(2)
 	vp = struct.unpack("<H", p)[0]
-	if vp > 0 and vp < 0x20 and fd.tell()-2 not in skip_bits:
+	if vp > 0x0 and vp < 0x20 and fd.tell()-2 not in skip_bits:
 		bit = fd.read(2)
 		if bit == struct.pack("<H",vp) and False:
 			obuf += p

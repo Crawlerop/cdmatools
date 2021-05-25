@@ -14,7 +14,7 @@ fda = bytearray(fd.read())
 width = int(sys.argv[2])
 height = int(sys.argv[3])
 
-bit_header = int(f"{width:02x}80{height:02x}80", 16).to_bytes(4, "big")
+bit_header = struct.pack("<HH", 0x8000+width, 0x8000+height)
 
 print(bit_header)
 
