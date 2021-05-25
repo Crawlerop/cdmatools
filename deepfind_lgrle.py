@@ -41,7 +41,7 @@ while tg_offs != -1:
 			bit = fd.read(2)
 			toutp += bit*cnt
 	
-	outp += toutp
+	outp += toutp[:(width*height)*2]
 	tg_offs = fda.find(bit_header, tg_offs+4)
     
 open(sys.argv[4],"wb").write(outp)
