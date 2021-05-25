@@ -29,7 +29,7 @@ while tg_offs != -1:
 	toutp = bytearray()
 	fd.seek(tg_offs+4)
 	
-	while len(toutp)<(width*height)*2:
+	while len(toutp)<=(width*height)*2:
 		tt = struct.unpack("<H", fd.read(2))[0]
 		
 		compressed = tt >> 15 # 1 bit: 0x0: Raw, 0x1: RLE
