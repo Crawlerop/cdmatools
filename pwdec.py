@@ -31,7 +31,7 @@ temp = bytearray()
 
 while df.tell()<sz:
 	cnt = df.read(1)[0]
-	print(cnt)
+	#print(cnt)
 	if cnt in [0xff,0x0]: continue
 	p_bit = df.read(1)[0]	
 	adt = pts[p_bit]
