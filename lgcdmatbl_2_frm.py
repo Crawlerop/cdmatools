@@ -40,7 +40,7 @@ for cn in range(imgcnt):
     tsz = ((int(width)*int(height))*2)
     
     if widthtype == 0x80 and heighttype == 0x80 and tsz != 0:
-        while len(outtmp) <= tsz:
+        while len(outtmp) < tsz:
             tt = struct.unpack("<H", fd.read(2))[0]
             
             compressed = tt >> 15 # 1 bit: 0x0: Raw, 0x1: RLE
