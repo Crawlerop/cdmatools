@@ -7,7 +7,8 @@ sz = os.path.getsize(sys.argv[1])
 df = open(sys.argv[1], "rb")
 pts = []
 
-assert df.read(4) == b"SI\x10\x00" # SI\x10\x00
+assert df.read(3) == b"SI\x10" # SI\x10
+assert df.read(1)[0] in [0,1]
 assert df.read(2) == b"\x02\x00" # Always 2?
 width = struct.unpack("<H", df.read(2))[0] # Width
 height = struct.unpack("<H", df.read(2))[0] # Height
