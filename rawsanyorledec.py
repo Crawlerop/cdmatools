@@ -24,7 +24,7 @@ cnto = 0
 while df.tell()<sz:
 	#print("b",hex(df.tell()))
 	cnt = df.read(1)[0]
-	if cnt == 0xff: 
+	if cnt == 0xff and (not raw or cnto >= width):
 		raw = False
 		cnto = 0
 		#raw2 = False
