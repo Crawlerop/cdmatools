@@ -6,7 +6,7 @@ import struct
 sz = os.path.getsize(sys.argv[1])
 df = open(sys.argv[1], "rb")
 
-assert df.read(3) == b"CW\x00" # CW\x00
+assert df.read(3) in [b"CW\x00",b"CH\x00"] # CW\x00
 width = df.read(1)[0]
 height = df.read(1)[0]
 df.read(2)
