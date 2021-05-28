@@ -17,7 +17,7 @@ assert df.read(3) == b"IC\x00"
 width = df.read(1)[0]
 height = df.read(1)[0]
 
-while df.tell()<sz:
+while df.tell()<sz and len(temp) < (width*height*3):
 	adt = df.read(1)
 	cnt = df.read(1)[0]
 	if cnt == 0: cnt = struct.unpack("<H", df.read(2))[0]

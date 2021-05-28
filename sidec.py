@@ -34,7 +34,7 @@ temp = bytearray()
 raw = False
 pixel = 0
 
-while df.tell()<sz or len(temp) < (width*height*3):
+while df.tell()<sz and len(temp) < (width*height*3):
 	cnt = df.read(1)[0]
 	if cnt == 0xff and (not raw or pixel >= width): 
 		raw = False
