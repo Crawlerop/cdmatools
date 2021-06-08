@@ -16,11 +16,16 @@ temp = bytearray()
 assert df.read(3) == b"IC\x00"
 width = df.read(1)[0]
 height = df.read(1)[0]
+nb = b""
 
 while df.tell()<sz and len(temp) < (width*height*3):
 	adt = df.read(1)
 	cnt = df.read(1)[0]
 	if cnt == 0: cnt = struct.unpack("<H", df.read(2))[0]
-	temp += getpalette(adt[0])*cnt
+	nb = getpalette(adt[0])
+	temp += nb*cnt
+	
+if len(temp) < (width*height*3):
+	temp += nb*((width*height*3)-len(temp))	
 	
 Image.frombuffer("RGB", (width, height), bytes(temp)).save(sys.argv[2])
