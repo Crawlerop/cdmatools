@@ -26,6 +26,7 @@ while df.tell()<sz and len(temp) < (width*height*3):
 	temp += nb*cnt
 	
 if len(temp) < (width*height*3):
-	temp += nb*((width*height*3)-len(temp))	
+	#print(((width*height)-(len(temp)/3)))
+	temp += nb*int((width*height)-(len(temp)/3))	
 	
 Image.frombuffer("RGB", (width, height), bytes(temp)).save(sys.argv[2])
