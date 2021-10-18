@@ -2,8 +2,13 @@ import os
 import struct
 import sys
 
+V_EFS_BLOCK_SIZE = 0xF0
+
 if __name__ == "__main__":
     fd_data = open(sys.argv[1], "rb")
+    if len(sys.argv) > 2:
+        V_EFS_BLOCK_SIZE = int(sys.argv[2], 16)
+
     fd_size = os.path.getsize(sys.argv[1])
 
     efs_files = {}
@@ -56,9 +61,9 @@ if __name__ == "__main__":
         else:
             raise Exception(efs_type, fd_data.tell())
 
-        padding = 0xf0-efs_block_size        
+        padding = V_EFS_BLOCK_SIZE-efs_block_size        
         if efs_type != 0xfe and not efs_full:
-            padding = (0xf0-(0x11+name_length))-efs_block_size
+            padding = (V_EFS_BLOCK_SIZE-(0x11+name_length))-efs_block_size
 
         if padding > 0: fd_data.read(padding)    
         fd_data.read(4)    
