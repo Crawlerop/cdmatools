@@ -87,7 +87,7 @@ def compute_1bpp_size(w,h):
 
         bits_left -= 1  
 
-def decode(a, w, h, rtype=0, bits=2, alignment=0, last_is_concealed=False, conceal_mode=0, extra_bits=0):
+def decode(a, w, h, rtype=0, bits=2, alignment=0, last_is_concealed=False, conceal_mode=0, extra_bits=0, edge_mode=0):
     b_io = a
     if not isinstance(a, IOBase):
         b_io = BytesIO(a)
@@ -119,7 +119,12 @@ def decode(a, w, h, rtype=0, bits=2, alignment=0, last_is_concealed=False, conce
     output = bytearray()
     state = b""
     width = 0
+    height = 0
     last_state = b""
+    first_w_pixel_state = b""
+    r_data = []
+
+    line = bytearray()
 
     for t in pixmap:
         if t == 0:
@@ -129,17 +134,29 @@ def decode(a, w, h, rtype=0, bits=2, alignment=0, last_is_concealed=False, conce
             state = b_io.read(bits)  
 
             if width <= 0:
+                first_w_pixel_state = state
                 last_state = state            
 
             if state == b"":
                 state = last_state
-                output += last_state
 
             if last_is_concealed and width >= w-1:                     
                 output += last_state
                 width = -1
             else:
-                output += state
+                if edge_mode == 1 and width >= w-1:
+                    cur_pixel = r_data.pop(0) if height > 0 else first_w_pixel_state
+                    output += cur_pixel+line                
+                    r_data.append(state)
+                    line = bytearray()
+                    width = -1
+                    height += 1
+                else:
+                    if edge_mode == 1:
+                        line += state
+                    else:
+                        output += state
+                    
                 
         elif t == 1:
             if state == b"":
@@ -149,9 +166,22 @@ def decode(a, w, h, rtype=0, bits=2, alignment=0, last_is_concealed=False, conce
                     raise Exception("not enough data")
 
                 if width <= 0:
+                    first_w_pixel_state = state
                     last_state = state    
 
-            output += state
+            if edge_mode == 1 and width >= w-1:
+                cur_pixel = r_data.pop(0) if height > 0 else first_w_pixel_state
+                output += cur_pixel+line    
+                r_data.append(state)            
+                line = bytearray()
+                width = -1
+                height += 1
+            else:
+                if edge_mode == 1:
+                    line += state
+                else:
+                    output += state
+
             if last_is_concealed and width >= w-1:
                 width = -1
                 
