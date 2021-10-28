@@ -5,12 +5,11 @@ def make_key(a):
     buffer = bytearray(b"\0"*len(a))
     offset = 0
 
-    while offset < len(a):           
-        buffer[offset] = a[offset+3]
-        buffer[offset+1] = a[offset+2]
-        buffer[offset+2] = a[offset+1]
-        buffer[offset+3] = a[offset]        
-        offset += 4
+    while offset < len(a):        
+        needed = min(4,len(a)-offset)
+        for e in range(needed):                        
+            buffer[offset+e] = a[offset+(needed-(e+1))]            
+        offset += needed          
     
     return buffer
 
@@ -18,14 +17,15 @@ def make_key_2(a):
     buffer = bytearray(b"\0"*len(a))
     offset = 0
 
-    while offset < len(a):           
-        buffer[offset] = a[offset+1]
-        buffer[offset+1] = a[offset]      
-        offset += 2
+    while offset < len(a):        
+        needed = min(2,len(a)-offset)
+        for e in range(needed):                        
+            buffer[offset+e] = a[offset+(needed-(e+1))]            
+        offset += needed     
     
     return buffer    
 
-def b1tob8(a):
+def b1tob8(a, skip=0):
     bits = []    
 
     for b in a:        
@@ -33,16 +33,22 @@ def b1tob8(a):
             binary = (b >> (7-i)) & 1
             bits.append(binary)
     
+    if skip > 0:
+        bits = bits[:-skip]
+
     return bits
 
-def b1tob8_b(a):
+def b1tob8_b(a, skip=0):
     bits = []    
 
     for b in a:        
         for i in range(8):
             binary = (b >> i) & 1
             bits.append(binary)
-    
+            
+    if skip > 0:            
+        bits = bits[:-skip]    
+
     return bits
 
 '''
@@ -61,12 +67,42 @@ def make_rle_table(b):
     return tbl
 '''
 
-def decode(a, w, h, rtype=0, bits=2, alignment=0, last_is_concealed=False, conceal_mode=0):
+def compute_1bpp_size(w,h):
+    size = 1
+    x = 0
+    y = 0
+    bits_left = 7
+
+    while True:
+        x += 1
+        if x >= w:
+            y += 1
+            x = 0
+            if y >= h:
+                return size, bits_left
+
+        if bits_left <= 0:
+            size += 1
+            bits_left = 8
+
+        bits_left -= 1  
+
+def decode(a, w, h, rtype=0, bits=2, alignment=0, last_is_concealed=False, conceal_mode=0, extra_bits=0):
     b_io = a
     if not isinstance(a, IOBase):
         b_io = BytesIO(a)
 
-    p_data = b_io.read(int((w*h)/8))
+    #p_data = b_io.read(int((w*h)/8))
+    key_size, skip_bits = compute_1bpp_size(w,h)   
+    #print(key_size, w, h) 
+
+    p_data = b_io.read(key_size)
+    if extra_bits > 0:
+        p_data += b_io.read(extra_bits)
+    elif extra_bits == -1:
+        extra_bits_required = 4-(key_size%4)
+        if extra_bits_required < 4:
+            p_data += b_io.read(extra_bits_required)
 
     if rtype == 0:
         p_data = make_key(p_data)
@@ -74,10 +110,10 @@ def decode(a, w, h, rtype=0, bits=2, alignment=0, last_is_concealed=False, conce
     elif rtype == 1 or rtype == 2:
         p_data = make_key_2(p_data)
 
-    pixmap = b1tob8(p_data)
+    pixmap = b1tob8(p_data, skip_bits)
     if rtype == 2:
-        pixmap = b1tob8_b(p_data)
-
+        pixmap = b1tob8_b(p_data, skip_bits)
+    
     b_io.read(alignment)
 
     output = bytearray()
@@ -87,16 +123,18 @@ def decode(a, w, h, rtype=0, bits=2, alignment=0, last_is_concealed=False, conce
 
     for t in pixmap:
         if t == 0:
-            if conceal_mode == 0:
-                last_state = state
+            
+            last_state = state
 
-            state = b_io.read(bits)    
+            state = b_io.read(bits)  
 
-            if conceal_mode == 1 and width <= 0:
+            if width <= 0:
                 last_state = state            
 
             if state == b"":
-                raise Exception("not enough data")
+                state = last_state
+                output += last_state
+
             if last_is_concealed and width >= w-1:                     
                 output += last_state
                 width = -1
@@ -104,6 +142,15 @@ def decode(a, w, h, rtype=0, bits=2, alignment=0, last_is_concealed=False, conce
                 output += state
                 
         elif t == 1:
+            if state == b"":
+                state = b_io.read(bits)
+
+                if state == b"":
+                    raise Exception("not enough data")
+
+                if width <= 0:
+                    last_state = state    
+
             output += state
             if last_is_concealed and width >= w-1:
                 width = -1

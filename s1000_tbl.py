@@ -51,7 +51,7 @@ if __name__ == "__main__":
         if offset == 0xf81f: # Transparency?
             transparent = True
             offset = struct.unpack("<L", fd.read(4))[0]
-            print(offset)
+            #print(offset)
 
         palette_offset = struct.unpack("<L", fd.read(4))[0]
         img_type = struct.unpack("<L", fd.read(4))[0]
@@ -68,10 +68,11 @@ if __name__ == "__main__":
         dec_data = None
 
         if img_type == 1:
-            dec_data = xdecode(fd, width, height, 3 if bpp == 8 else 2, int(bpp/8), 2 if bpp == 8 else 4)   
+            dec_data = xdecode(fd, width, height, 3 if bpp == 8 else 2, int(bpp/8), (2 if (width%8) == 0 else 0) if bpp == 8 else 4)   
         else:
             dec_data = fd.read((width*height)*int(bpp/8))
                      
+        #print(len(dec_data))                     
         #open("dec_tmp", "wb").write(dec_data)
 
         if bpp == 16:
