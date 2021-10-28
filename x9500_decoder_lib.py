@@ -144,15 +144,16 @@ def decode(a, w, h, rtype=0, bits=2, alignment=0, last_is_concealed=False, conce
                 output += last_state
                 width = -1
             else:
-                if edge_mode == 1 and width >= w-1:
-                    cur_pixel = r_data.pop(0) if height > 0 else first_w_pixel_state
+                if (edge_mode == 1 or edge_mode == 2) and width >= w-1:
+                    cur_pixel = r_data.pop(0) if height > 0 else first_w_pixel_state if edge_mode == 1 else b""
                     output += cur_pixel+line                
                     r_data.append(state)
                     line = bytearray()
                     width = -1
                     height += 1
+
                 else:
-                    if edge_mode == 1:
+                    if edge_mode == 1 or edge_mode == 2:
                         line += state
                     else:
                         output += state
@@ -169,15 +170,16 @@ def decode(a, w, h, rtype=0, bits=2, alignment=0, last_is_concealed=False, conce
                     first_w_pixel_state = state
                     last_state = state    
 
-            if edge_mode == 1 and width >= w-1:
-                cur_pixel = r_data.pop(0) if height > 0 else first_w_pixel_state
-                output += cur_pixel+line    
-                r_data.append(state)            
+            if (edge_mode == 1 or edge_mode == 2) and width >= w-1:
+                cur_pixel = r_data.pop(0) if height > 0 else first_w_pixel_state if edge_mode == 1 else b""
+                output += cur_pixel+line                
+                r_data.append(state)
                 line = bytearray()
                 width = -1
                 height += 1
+                    
             else:
-                if edge_mode == 1:
+                if edge_mode == 1 or edge_mode == 2:
                     line += state
                 else:
                     output += state
@@ -187,6 +189,10 @@ def decode(a, w, h, rtype=0, bits=2, alignment=0, last_is_concealed=False, conce
                 
         width += 1
 
+    if edge_mode == 2:
+        output = r_data.pop(0)+output
+
+    print(len(output))
     return output
 
 '''''
