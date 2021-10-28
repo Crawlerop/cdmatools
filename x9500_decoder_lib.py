@@ -192,7 +192,7 @@ def decode(a, w, h, rtype=0, bits=2, alignment=0, last_is_concealed=False, conce
     if edge_mode == 2:
         output = r_data.pop(0)+output
 
-    print(len(output))
+    #print(len(output))
     return output
 
 '''''
