@@ -68,7 +68,8 @@ if __name__ == "__main__":
         dec_data = None
 
         if img_type == 1:
-            dec_data = xdecode(fd, width, height, 3 if bpp == 8 else 2, int(bpp/8), (2 if (width%8) == 0 else 0) if bpp == 8 else 4)   
+            stride = int(sys.argv[4]) if len(sys.argv) >= 5 else (2 if (width%8) == 0 else 0) if bpp == 8 else 4
+            dec_data = xdecode(fd, width, height, 3 if bpp == 8 else 1, int(bpp/8), stride)   
         else:
             dec_data = fd.read((width*height)*int(bpp/8))
                      
