@@ -6,7 +6,10 @@ from io import BytesIO
 file_size = os.path.getsize(sys.argv[1])
 file_data = open(sys.argv[1], "rb")
 
-output = open(sys.argv[2], "wb")
+width, height, offset = int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[2], 16)
+print(width, height)
+
+output = open(sys.argv[5], "wb")
 output_buffer = bytearray()
 
 decoding_buffer = BytesIO()
@@ -28,5 +31,13 @@ while file_data.tell() < file_size:
         decoding_buffer.write(rle_bit)
         output_buffer += rle_bit
 
-output.write(output_buffer)
-		
+    if len(output_buffer) >= (width*height)*2:
+        output.write(output_buffer)
+        #input("")
+
+        decoding_buffer.seek(0x10000)
+        decoding_buffer.write(output_buffer)
+        decoding_buffer.seek(0)
+        output_buffer.clear()
+
+        delimiter = file_data.read(2)
